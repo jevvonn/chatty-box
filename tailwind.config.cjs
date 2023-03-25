@@ -9,7 +9,7 @@ const config = {
       {
         mytheme: {
           primary: "#661AE6",
-          secondary: "#6ee7b7",
+          secondary: "#D926AA",
           accent: "#1FB2A5",
           neutral: "#191D24",
           "base-100": "#2A303C",
