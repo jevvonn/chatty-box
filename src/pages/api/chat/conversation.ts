@@ -17,5 +17,21 @@ export default async function handler(
   if (!session)
     return res.status(401).json({ success: false, message: "Unauthorized" });
 
-  // return res.status(200).json(user);
+  const userConv = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    include: {
+      conversations: {
+        include: {
+          users: true,
+          messages: {
+            take: -1,
+          },
+        },
+      },
+    },
+  });
+
+  return res.status(200).json(userConv);
 }

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "~/server/auth";
 import { prisma } from "~/server/db";
+import { ConversationExpect } from "~/types/api";
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,7 +18,48 @@ export default async function handler(
   if (!session)
     return res.status(401).json({ success: false, message: "Unauthorized" });
 
-  const userId: string = req.body.userId;
+  const body: ConversationExpect = req.body;
 
-  // return res.status(200).json(userOnConv);
+  if (!body.is_group) {
+    const conversation = await prisma.conversation.findMany({
+      where: {
+        AND: [
+          {
+            users: {
+              some: {
+                id: {
+                  equals: body.users[0],
+                },
+              },
+            },
+          },
+          {
+            users: {
+              some: {
+                id: {
+                  equals: body.users[1],
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    if (conversation.length) return res.status(200).json(conversation[0]);
+  }
+
+  const newConversation = await prisma.conversation.create({
+    data: {
+      name: body.name || "noneed",
+      is_group: body.is_group,
+      users: {
+        connect: body.users.map((id) => {
+          return { id };
+        }),
+      },
+    },
+  });
+
+  return res.status(200).json(newConversation);
 }
