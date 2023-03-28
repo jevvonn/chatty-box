@@ -1,19 +1,39 @@
 import { BsFillChatDotsFill } from "react-icons/bs";
+import { useAppSelector } from "~/hooks/redux";
 import HeaderLeft from "./HeaderLeft";
 import NewConversationModal from "./NewConversationModal";
+import { RootState } from "../../store/index";
+import ConversationCard from "./ConversationCard";
+import { BiLoaderAlt } from "react-icons/bi";
 
 const LeftSide = () => {
+  const conversations = useAppSelector(
+    (state: RootState) => state.conversation.allConversations
+  );
+  const selectedConv = useAppSelector(
+    (state: RootState) => state.conversation.selectedConversation
+  );
+
   return (
-    <div className="relative flex w-full flex-col border-r-[1px] border-slate-700 lg:w-1/3">
+    <div
+      className={`${
+        selectedConv && "hidden"
+      } relative  w-full flex-col border-r-[1px] border-slate-700 lg:flex lg:w-1/3`}
+    >
       <HeaderLeft />
       <div className="flex flex-col overflow-y-auto">
-        {/* {data?.conversations.map((item) => (
-          <ConversationCard
-            key={item.conversation.id}
-            active={false}
-            conversation={item.conversation}
-          />
-        ))} */}
+        {conversations.length ? (
+          conversations.map((conversation) => (
+            <ConversationCard
+              key={conversation.id}
+              conversation={conversation}
+            />
+          ))
+        ) : (
+          <div className="mt-4 flex w-full justify-center">
+            <BiLoaderAlt className="animate-spin" />
+          </div>
+        )}
       </div>
 
       <label

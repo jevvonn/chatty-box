@@ -1,64 +1,55 @@
 import { User } from "@prisma/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BsPerson, BsPlus } from "react-icons/bs";
 import { ConversationExpect } from "~/types/api";
 import FriendCard from "./FriendCard";
 import FriendGroupCard from "./FriendGroupCard";
 
-const getUsers = async () => {
-  const { data } = await axios.get("/api/chat/users");
-  return data;
-};
-
 const NewConversationModal = ({ id }: { id: string }) => {
   const session = useSession();
   const checkbox = useRef<HTMLInputElement>(null);
+
+  const [users, setUsers] = useState<User[]>([]);
   const [newGroup, setNewGroup] = useState(false);
   const [userSelected, setUserSelected] = useState<User[]>([]);
   const [groupName, setGroupName] = useState("");
-  const { data } = useQuery<User[]>({
-    queryFn: getUsers,
-    queryKey: ["users"],
-  });
 
-  const { mutate } = useMutation(
-    async (data: ConversationExpect) =>
-      axios.post("/api/chat/newConversation", data),
-    {
-      onError(error) {
-        console.log(error);
-      },
-      onSuccess(data) {
-        console.log(data);
-      },
-    }
-  );
-
-  const choose = (id: string) => {
-    checkbox.current?.click();
-    mutate({
-      is_group: false,
-      users: [session.data?.user.id as string, id],
-    });
+  const getUsers = async () => {
+    const { data }: { data: User[] } = await axios.get("/api/chat/users");
+    setUsers(data);
   };
 
-  const createGroup = () => {
+  const choose = async (id: string) => {
     checkbox.current?.click();
-    mutate({
-      name: groupName,
+    let data: ConversationExpect = {
+      is_group: false,
+      users: [session.data?.user.id as string, id],
+      name: "noneed",
+    };
+
+    let res = await axios.post("/api/chat/newConversation", data);
+    console.log(res.data);
+  };
+
+  const createGroup = async () => {
+    checkbox.current?.click();
+    setUserSelected([]);
+    setNewGroup(false);
+    setGroupName("");
+
+    let data: ConversationExpect = {
       is_group: true,
       users: [
         session.data?.user.id as string,
         ...userSelected.map((user) => user.id),
       ],
-    });
+      name: groupName,
+    };
 
-    setUserSelected([]);
-    setNewGroup(false);
-    setGroupName("");
+    let res = await axios.post("/api/chat/newConversation", data);
+    console.log(res.data);
   };
 
   const chooseAsGroup = (user: User) => {
@@ -68,6 +59,10 @@ const NewConversationModal = ({ id }: { id: string }) => {
         : [user, ...prev];
     });
   };
+
+  useEffect(() => {
+    getUsers();
+  }, []);
 
   return (
     <>
@@ -121,10 +116,10 @@ const NewConversationModal = ({ id }: { id: string }) => {
           )}
           <div className="mt-3 flex h-48 flex-col overflow-y-auto">
             {!newGroup
-              ? data?.map((user) => (
+              ? users?.map((user) => (
                   <FriendCard key={user.id} onChoose={choose} user={user} />
                 ))
-              : data?.map((user) => (
+              : users?.map((user) => (
                   <FriendGroupCard
                     key={user.id}
                     onChoose={chooseAsGroup}

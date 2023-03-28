@@ -6,7 +6,7 @@ const LoginButton = () => {
     <button
       onClick={() =>
         signIn("google", {
-          callbackUrl: "/chat",
+          callbackUrl: "/",
         })
       }
       className="btn-primary btn text-white"

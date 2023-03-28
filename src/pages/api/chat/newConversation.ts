@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "~/server/auth";
 import { prisma } from "~/server/db";
+import pusherServer from "~/server/pusher";
 import { ConversationExpect } from "~/types/api";
 
 export default async function handler(
@@ -42,11 +43,27 @@ export default async function handler(
               },
             },
           },
+          {
+            is_group: {
+              equals: false,
+            },
+          },
         ],
+      },
+      include: {
+        users: true,
+        last_message: true,
       },
     });
 
-    if (conversation.length) return res.status(200).json(conversation[0]);
+    if (conversation.length) {
+      pusherServer.trigger(
+        session.user.id,
+        "new-conversation",
+        conversation[0]
+      );
+      return res.status(200).json({ success: true });
+    }
   }
 
   const newConversation = await prisma.conversation.create({
@@ -59,7 +76,13 @@ export default async function handler(
         }),
       },
     },
+    include: {
+      users: true,
+      last_message: true,
+    },
   });
 
-  return res.status(200).json(newConversation);
+  pusherServer.trigger([...body.users], "new-conversation", newConversation);
+
+  return res.status(200).json({ success: true });
 }
