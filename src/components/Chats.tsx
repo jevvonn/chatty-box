@@ -6,12 +6,8 @@ import pusher from "~/client/pusher";
 import LeftSide from "~/components/chat/LeftSide";
 import RightSide from "~/components/chat/RightSide";
 import { useAppDispatch } from "~/hooks/redux";
-import {
-  newConversation,
-  setInitial,
-  setSelectedConversation,
-} from "~/store/slicers/conversationSlice";
-import { ConversationFull } from "~/types/prismaTypes";
+import { newConversation, setInitial } from "~/store/slicers/conversationSlice";
+import type { ConversationFull } from "~/types/prismaTypes";
 
 const Chats = () => {
   const session = useSession();
@@ -31,7 +27,7 @@ const Chats = () => {
     channel.bind("new-conversation", (data: ConversationFull) => {
       dispatch(newConversation(data));
     });
-  }, []);
+  }, [dispatch, newConversation, getConversation, session]);
 
   return (
     <>

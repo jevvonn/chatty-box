@@ -4,11 +4,11 @@ import { AiOutlineGoogle } from "react-icons/ai";
 const LoginButton = () => {
   return (
     <button
-      onClick={() =>
+      onClick={() => {
         signIn("google", {
           callbackUrl: "/",
-        })
-      }
+        });
+      }}
       className="btn-primary btn text-white"
     >
       <AiOutlineGoogle color="white" size={20} className="mr-2" /> Login With

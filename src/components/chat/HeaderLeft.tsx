@@ -33,12 +33,21 @@ const HeaderLeft = () => {
             <Link href={"/profile"}>Profile</Link>
           </li>
           <li>
-            <div onClick={async () => await axios.post("/api/pusher")}>
+            <div
+              onClick={async () => {
+                await axios.post("/api/pusher");
+              }}
+            >
               Sync Contact
             </div>
           </li>
           <li>
-            <div onClick={() => signOut()} className="text-red-400">
+            <div
+              onClick={() => {
+                signOut();
+              }}
+              className="text-red-400"
+            >
               Sign Out
             </div>
           </li>
