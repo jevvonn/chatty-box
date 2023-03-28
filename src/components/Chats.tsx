@@ -27,7 +27,7 @@ const Chats = () => {
     channel.bind("new-conversation", (data: ConversationFull) => {
       dispatch(newConversation(data));
     });
-  }, [dispatch, newConversation, getConversation, session]);
+  }, [dispatch, session]);
 
   return (
     <>
